@@ -1,4 +1,5 @@
 import 'package:book_management/utils/services/shared_prefernce.dart';
+import 'package:book_management/viewModel/book_viewModel.dart';
 import 'package:book_management/views/homepage.dart';
 import 'package:book_management/views/intro_screen.dart';
 import 'package:book_management/views/login_screen.dart';
@@ -7,15 +8,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'firebase_options.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferencesHelper.init();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(MyApp());
+
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => BookViewModel()),
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -27,8 +26,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       routes: {
-        '/': (context) => SplashScreen(),
-        'home_page': (context) => HomePage(),
+        '/': (context) => HomePage(),
+        //  'home_page': (context) => HomePage(),
         'intro_screen': (context) => IntroScreen(),
         'login_page': (context) => LoginScreen(),
       },

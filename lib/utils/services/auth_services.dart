@@ -9,4 +9,85 @@ class AuthHelper {
 
   static FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   static GoogleSignIn googleSignIn = GoogleSignIn();
+
+  signUp({required email, required password}) async {
+    Map<String, dynamic> res = {};
+    try {
+      UserCredential userCredential = await firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
+      User? user = userCredential.user;
+      res['user'] = user;
+    } on FirebaseAuthException catch (e) {
+      switch (e) {
+        case "Network-request-failed":
+          res['error'] = "NO Internet available";
+          break;
+        case "Operation-not-allowed":
+          res['error'] = "This is displayed by admin";
+          break;
+        case "Weak-Password":
+          res['error'] = "password must be greater than 6 letters..";
+          break;
+        case "email-already-in-use":
+          res['error'] = "This email is already  exixts...";
+          break;
+        default:
+          res['error'] = "${e.code}";
+      }
+    }
+    return res;
+  }
+
+  Future<Map<String, dynamic>> signInWithEmailAndPassword(
+      {required String email, required String password}) async {
+    Map<String, dynamic> res = {};
+
+    try {
+      UserCredential userCredential = await firebaseAuth
+          .signInWithEmailAndPassword(email: email, password: password);
+      User? user = userCredential.user;
+      res['user'] = user;
+    } on FirebaseAuthException catch (e) {
+      switch (e) {
+        case "Network-request-failed":
+          res['error'] = "NO Internet available";
+          break;
+        case "Operation-not-allowed":
+          res['error'] = "This is displayed by admin";
+          break;
+        case "Weak-Password":
+          res['error'] = "password must be greater than 6 letters..";
+          break;
+        case "email-already-in-use":
+          res['error'] = "This email is already  exixts...";
+          break;
+        default:
+          res['error'] = "${e.code}";
+      }
+    }
+    return res;
+  }
+
+  signInGoogle() async {
+    Map<String, dynamic> res = {};
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+      UserCredential userCredential =
+          await firebaseAuth.signInWithCredential(credential);
+
+      User? user = userCredential.user;
+      res['user'] = user;
+    } catch (e) {
+      res['error'] = "${e}";
+    }
+    return res;
+  }
 }
